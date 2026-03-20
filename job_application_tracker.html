@@ -1,0 +1,281 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{font-family:var(--font-sans);padding:1rem 0 2rem}
+.top{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:16px}
+.stat{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;text-align:center}
+.stat-n{font-size:22px;font-weight:500;color:var(--color-text-primary)}
+.stat-l{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+.toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.toolbar input{flex:1;min-width:160px;font-size:13px;padding:0 12px;height:34px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary)}
+.toolbar select{font-size:12px;padding:0 8px;height:34px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary)}
+.add-btn{font-size:12px;font-weight:500;padding:0 16px;height:34px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-text-primary);color:var(--color-background-primary);cursor:pointer;white-space:nowrap}
+.add-btn:hover{opacity:0.85}
+.tbl-wrap{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+thead tr{background:var(--color-background-secondary)}
+th{font-size:11px;font-weight:500;color:var(--color-text-secondary);padding:8px 12px;text-align:left;border-bottom:0.5px solid var(--color-border-tertiary);letter-spacing:0.04em;text-transform:uppercase}
+td{font-size:12px;color:var(--color-text-primary);padding:8px 12px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--color-background-secondary)}
+.status-select{font-size:11px;font-weight:500;padding:3px 8px;border-radius:99px;border:none;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;text-align:center}
+.s-applied{background:#E6F1FB;color:#0C447C}
+.s-viewed{background:#FAEEDA;color:#633806}
+.s-interview{background:#EEEDFE;color:#3C3489}
+.s-rejected{background:#FCEBEB;color:#791F1F}
+.s-offer{background:#E1F5EE;color:#085041}
+.s-noresponse{background:#F1EFE8;color:#444441}
+.del-btn{font-size:11px;color:var(--color-text-tertiary);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px}
+.del-btn:hover{color:var(--color-text-danger);background:var(--color-background-danger)}
+.empty{text-align:center;padding:2rem;font-size:13px;color:var(--color-text-secondary)}
+.note-input{font-size:11px;border:none;background:transparent;color:var(--color-text-secondary);width:100%;outline:none;font-family:var(--font-sans)}
+.note-input:focus{color:var(--color-text-primary)}
+.modal-bg{background:rgba(0,0,0,0.35);border-radius:var(--border-radius-lg);padding:40px 20px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.modal{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;width:100%;max-width:480px}
+.modal h3{font-size:14px;font-weight:500;margin-bottom:14px;color:var(--color-text-primary)}
+.field{margin-bottom:10px}
+.field label{font-size:11px;color:var(--color-text-secondary);display:block;margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:0.04em}
+.field input,.field select,.field textarea{width:100%;font-size:13px;padding:7px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-family:var(--font-sans)}
+.field textarea{resize:vertical;min-height:56px}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.modal-btns button{font-size:12px;padding:6px 16px;border-radius:var(--border-radius-md);cursor:pointer;border:0.5px solid var(--color-border-secondary);background:none;color:var(--color-text-primary)}
+.modal-btns .save{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary)}
+.filter-active{border-color:var(--color-text-primary) !important;color:var(--color-text-primary) !important}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <div class="stat"><div class="stat-n" id="s-total">0</div><div class="stat-l">Total applied</div></div>
+    <div class="stat"><div class="stat-n" id="s-interview" style="color:#534AB7">0</div><div class="stat-l">Interviews</div></div>
+    <div class="stat"><div class="stat-n" id="s-offer" style="color:#0F6E56">0</div><div class="stat-l">Offers</div></div>
+    <div class="stat"><div class="stat-n" id="s-pending" style="color:#BA7517">0</div><div class="stat-l">Pending response</div></div>
+    <div class="stat"><div class="stat-n" id="s-today">0</div><div class="stat-l">Applied today</div></div>
+  </div>
+
+  <div id="add-form" class="modal-bg" style="display:none">
+    <div class="modal">
+      <h3>Add new application</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field"><label>Company</label><input id="f-company" placeholder="e.g. Accenture" /></div>
+        <div class="field"><label>Role</label><input id="f-role" placeholder="e.g. Business Analyst" /></div>
+        <div class="field"><label>Platform</label>
+          <select id="f-platform">
+            <option>Naukri</option><option>LinkedIn</option><option>Instahyre</option>
+            <option>Wellfound</option><option>Company website</option><option>Email</option><option>Referral</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field"><label>Date applied</label><input type="date" id="f-date" /></div>
+        <div class="field"><label>Status</label>
+          <select id="f-status">
+            <option value="applied">Applied</option>
+            <option value="viewed">Viewed by recruiter</option>
+            <option value="interview">Interview scheduled</option>
+            <option value="offer">Offer received</option>
+            <option value="rejected">Rejected</option>
+            <option value="noresponse">No response</option>
+          </select>
+        </div>
+        <div class="field"><label>Follow up date</label><input type="date" id="f-followup" /></div>
+      </div>
+      <div class="field"><label>Notes</label><textarea id="f-notes" placeholder="Any notes — salary, contact name, JD link..."></textarea></div>
+      <div class="modal-btns">
+        <button onclick="closeForm()">Cancel</button>
+        <button class="save" onclick="saveApp()">Save application</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="Search company or role..." oninput="render()">
+    <select id="filter-status" onchange="render()">
+      <option value="">All statuses</option>
+      <option value="applied">Applied</option>
+      <option value="viewed">Viewed</option>
+      <option value="interview">Interview</option>
+      <option value="offer">Offer</option>
+      <option value="rejected">Rejected</option>
+      <option value="noresponse">No response</option>
+    </select>
+    <select id="filter-platform" onchange="render()">
+      <option value="">All platforms</option>
+      <option>Naukri</option><option>LinkedIn</option><option>Instahyre</option>
+      <option>Wellfound</option><option>Company website</option><option>Email</option><option>Referral</option>
+    </select>
+    <button class="add-btn" onclick="openForm()">+ Add application</button>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:18%">Company</th>
+          <th style="width:18%">Role</th>
+          <th style="width:10%">Platform</th>
+          <th style="width:10%">Date</th>
+          <th style="width:13%">Status</th>
+          <th style="width:10%">Follow up</th>
+          <th style="width:17%">Notes</th>
+          <th style="width:4%"></th>
+        </tr>
+      </thead>
+      <tbody id="tbl-body"></tbody>
+    </table>
+    <div id="empty-state" class="empty" style="display:none">No applications yet. Add your first one above.</div>
+  </div>
+</div>
+
+<script>
+const STATUSES = {
+  applied:    {label:'Applied',             cls:'s-applied'},
+  viewed:     {label:'Viewed by recruiter', cls:'s-viewed'},
+  interview:  {label:'Interview',           cls:'s-interview'},
+  offer:      {label:'Offer received',      cls:'s-offer'},
+  rejected:   {label:'Rejected',            cls:'s-rejected'},
+  noresponse: {label:'No response',         cls:'s-noresponse'},
+};
+
+let apps = [];
+
+async function load() {
+  try {
+    const r = await window.storage.get('job_apps');
+    if (r && r.value) apps = JSON.parse(r.value);
+  } catch(e) { apps = []; }
+  setDefaultDate();
+  render();
+  updateStats();
+}
+
+async function save() {
+  try { await window.storage.set('job_apps', JSON.stringify(apps)); } catch(e) {}
+}
+
+function setDefaultDate() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('f-date').value = today;
+}
+
+function openForm() {
+  setDefaultDate();
+  document.getElementById('f-company').value = '';
+  document.getElementById('f-role').value = '';
+  document.getElementById('f-notes').value = '';
+  document.getElementById('f-followup').value = '';
+  document.getElementById('f-status').value = 'applied';
+  document.getElementById('add-form').style.display = 'flex';
+}
+
+function closeForm() {
+  document.getElementById('add-form').style.display = 'none';
+}
+
+function saveApp() {
+  const company = document.getElementById('f-company').value.trim();
+  const role = document.getElementById('f-role').value.trim();
+  if (!company) { document.getElementById('f-company').focus(); return; }
+  apps.unshift({
+    id: Date.now(),
+    company,
+    role: role || 'Business Analyst',
+    platform: document.getElementById('f-platform').value,
+    date: document.getElementById('f-date').value,
+    status: document.getElementById('f-status').value,
+    followup: document.getElementById('f-followup').value,
+    notes: document.getElementById('f-notes').value.trim(),
+  });
+  save();
+  closeForm();
+  render();
+  updateStats();
+}
+
+function changeStatus(id, val) {
+  const app = apps.find(a => a.id === id);
+  if (app) { app.status = val; save(); updateStats(); updateRowStyle(id, val); }
+}
+
+function updateRowStyle(id, status) {
+  const sel = document.querySelector(`select[data-id="${id}"]`);
+  if (sel) {
+    sel.className = 'status-select ' + (STATUSES[status]?.cls || 's-applied');
+  }
+}
+
+function updateNote(id, val) {
+  const app = apps.find(a => a.id === id);
+  if (app) { app.notes = val; save(); }
+}
+
+function deleteApp(id) {
+  apps = apps.filter(a => a.id !== id);
+  save();
+  render();
+  updateStats();
+}
+
+function updateStats() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('s-total').textContent = apps.length;
+  document.getElementById('s-interview').textContent = apps.filter(a => a.status === 'interview').length;
+  document.getElementById('s-offer').textContent = apps.filter(a => a.status === 'offer').length;
+  document.getElementById('s-pending').textContent = apps.filter(a => a.status === 'applied' || a.status === 'viewed').length;
+  document.getElementById('s-today').textContent = apps.filter(a => a.date === today).length;
+}
+
+function fmt(d) {
+  if (!d) return '—';
+  const [y,m,day] = d.split('-');
+  return `${day}/${m}/${y.slice(2)}`;
+}
+
+function render() {
+  const search = document.getElementById('search').value.toLowerCase();
+  const fStatus = document.getElementById('filter-status').value;
+  const fPlatform = document.getElementById('filter-platform').value;
+
+  let filtered = apps.filter(a => {
+    const matchSearch = !search || a.company.toLowerCase().includes(search) || a.role.toLowerCase().includes(search);
+    const matchStatus = !fStatus || a.status === fStatus;
+    const matchPlatform = !fPlatform || a.platform === fPlatform;
+    return matchSearch && matchStatus && matchPlatform;
+  });
+
+  const tbody = document.getElementById('tbl-body');
+  const empty = document.getElementById('empty-state');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filtered.map(a => {
+    const st = STATUSES[a.status] || STATUSES.applied;
+    const today = new Date().toISOString().split('T')[0];
+    const isFollowupDue = a.followup && a.followup <= today && (a.status === 'applied' || a.status === 'viewed');
+    const followupStyle = isFollowupDue ? 'color:var(--color-text-warning);font-weight:500' : '';
+
+    const opts = Object.entries(STATUSES).map(([val, s]) =>
+      `<option value="${val}" ${a.status === val ? 'selected' : ''}>${s.label}</option>`
+    ).join('');
+
+    return `<tr>
+      <td style="font-weight:500">${a.company}</td>
+      <td style="color:var(--color-text-secondary)">${a.role}</td>
+      <td style="color:var(--color-text-secondary);font-size:11px">${a.platform}</td>
+      <td style="color:var(--color-text-secondary);font-size:11px">${fmt(a.date)}</td>
+      <td>
+        <select class="status-select ${st.cls}" data-id="${a.id}" onchange="changeStatus(${a.id}, this.value)">
+          ${opts}
+        </select>
+      </td>
+      <td style="font-size:11px;${followupStyle}">${fmt(a.followup)}${isFollowupDue ? ' !' : ''}</td>
+      <td><input class="note-input" value="${a.notes.replace(/"/g,'&quot;')}" placeholder="Add note..." onblur="updateNote(${a.id}, this.value)" /></td>
+      <td><button class="del-btn" onclick="deleteApp(${a.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+load();
+</script>
